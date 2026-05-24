@@ -79,3 +79,21 @@ UserEvent, AggregatedWindow, PageStat, ShardInfo.
 - domain/shard.go: ShardInfo
 
 **Git:** `feat: add UserEvent and AggregatedWindow domain models`
+
+---
+
+## Промпт 2.2 — Go: Kafka адаптер
+
+**Дата:** 2026-05-24
+
+**Промпт:** Реализация Kafka-адаптера: Producer с пакетной отправкой
+и экспоненциальным backoff, Consumer для чтения событий.
+
+**Результат:**
+- kafka/producer.go: Producer, NewProducer, SendEvent, SendBatch, Close
+  Ключ = UserID для партиционирования, MaxBufferedRecords(1000),
+  RetryBackoffFn с экспоненциальным backoff
+- kafka/consumer.go: Consumer, NewConsumer, ReadEvents, Close
+  GroupID из env KAFKA_GROUP_ID
+
+**Git:** `feat: add Kafka producer adapter (Redpanda)`
