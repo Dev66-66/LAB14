@@ -1,4 +1,22 @@
-version: "3.9"
+version: '3.9'
+
+# Сервисы будут добавлены в следующих промптах:
+# - redpanda       (Kafka-совместимый брокер)
+# - redpanda-init  (создание топиков)
+# - etcd           (координация сборщиков)
+# - collector      (Go-эмулятор событий)
+# - aggregator     (Go-агрегатор с tumbling window)
+# - arrow-server   (Go Arrow Flight RPC сервер)
+# - analyzer       (Python Polars + DuckDB)
+# - dashboard      (Streamlit)
 
 services: {}
-# TODO: add services (redpanda, etcd, collector, analyzer, dashboard)
+
+networks:
+  pipeline-network:
+    driver: bridge
+
+volumes:
+  redpanda-data:
+  etcd-data:
+  parquet-data:
