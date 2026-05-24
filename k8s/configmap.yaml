@@ -1,0 +1,16 @@
+# ConfigMap lab14-config — централизованное хранилище переменных окружения для всех
+# сервисов конвейера. Монтируется через envFrom, чтобы не дублировать env в каждом Deployment.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lab14-config
+  namespace: lab14
+data:
+  KAFKA_BROKERS: "redpanda:9092"
+  KAFKA_TOPIC: "user-events"
+  ETCD_ENDPOINTS: "etcd:2379"
+  ARROW_FLIGHT_HOST: "0.0.0.0"
+  ARROW_FLIGHT_PORT: "8815"
+  WINDOW_SIZE_SECONDS: "10"
+  BATCH_SIZE: "100"
+  LOG_LEVEL: "INFO"

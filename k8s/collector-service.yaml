@@ -1,0 +1,18 @@
+# Service lab14-collector — внутренний ClusterIP сервис для коллектора.
+# Используется HPA и другими сервисами конвейера для обращения к коллектору внутри кластера.
+apiVersion: v1
+kind: Service
+metadata:
+  name: lab14-collector
+  namespace: lab14
+  labels:
+    app: lab14-collector
+spec:
+  type: ClusterIP
+  selector:
+    app: lab14-collector
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP

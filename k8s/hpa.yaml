@@ -1,0 +1,33 @@
+# HorizontalPodAutoscaler lab14-collector-hpa — автомасштабирование коллектора.
+# Масштабирует Deployment lab14-collector от 1 до 5 реплик по двум метрикам:
+#   1. CPU utilization > 70% — стандартная метрика ресурса.
+#   2. kafka_consumer_lag > 100 — внешняя метрика Kafka (требует адаптера метрик,
+#      например kube-prometheus-stack + prometheus-adapter).
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lab14-collector-hpa
+  namespace: lab14
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lab14-collector
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    # Внешняя метрика отставания консьюмера Kafka.
+    # kafka_consumer_lag поставляется через prometheus-adapter или KEDA.
+    - type: External
+      external:
+        metric:
+          name: kafka_consumer_lag
+        target:
+          type: AverageValue
+          averageValue: "100"

@@ -1,0 +1,54 @@
+# Deployment lab14-collector — Go-эмулятор событий и агрегатор.
+# Запускается в 2 репликах для распределённой генерации событий.
+# Все настройки подтягиваются из ConfigMap lab14-config.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab14-collector
+  namespace: lab14
+  labels:
+    app: lab14-collector
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lab14-collector
+  template:
+    metadata:
+      labels:
+        app: lab14-collector
+    spec:
+      containers:
+        - name: collector
+          image: lab14-collector:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: lab14-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          # Проверка живости: если /health не отвечает, Pod перезапускается.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Проверка готовности: Pod не получает трафик до прохождения /ready.
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3

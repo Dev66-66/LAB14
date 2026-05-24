@@ -1,0 +1,41 @@
+# Deployment lab14-analyzer — Python-анализатор на Polars + DuckDB.
+# Читает данные через Arrow Flight RPC и сохраняет агрегаты в Parquet.
+# Том parquet-data монтируется в /app/data для персистентного хранения файлов.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab14-analyzer
+  namespace: lab14
+  labels:
+    app: lab14-analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lab14-analyzer
+  template:
+    metadata:
+      labels:
+        app: lab14-analyzer
+    spec:
+      containers:
+        - name: analyzer
+          image: lab14-analyzer:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: lab14-config
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: parquet-data
+              mountPath: /app/data
+      volumes:
+        - name: parquet-data
+          emptyDir: {}
+          # В production заменить на PersistentVolumeClaim для сохранения данных между перезапусками.

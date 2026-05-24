@@ -1,0 +1,35 @@
+# Deployment lab14-dashboard — Streamlit дашборд для визуализации событий.
+# Экспонирует порт 8501; доступ снаружи обеспечивается через NodePort сервис.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab14-dashboard
+  namespace: lab14
+  labels:
+    app: lab14-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lab14-dashboard
+  template:
+    metadata:
+      labels:
+        app: lab14-dashboard
+    spec:
+      containers:
+        - name: dashboard
+          image: lab14-dashboard:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8501
+          envFrom:
+            - configMapRef:
+                name: lab14-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

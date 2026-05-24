@@ -41,3 +41,23 @@ LAB14/, .gitignore, .env.example, README.md, PROMPT_LOG.md.
 - Named volumes: redpanda-data, etcd-data, parquet-data
 
 **Git:** `chore: add Docker Compose with Redpanda and etcd`
+
+---
+
+## Промпт 1.2 — Kubernetes манифесты
+
+**Дата:** 2026-05-24
+
+**Промпт:** Создание Kubernetes манифестов для развёртывания конвейера.
+
+**Результат:**
+- k8s/namespace.yaml: Namespace lab14
+- k8s/configmap.yaml: ConfigMap с переменными окружения
+- k8s/collector-deployment.yaml: Deployment коллектора (2 реплики)
+- k8s/collector-service.yaml: ClusterIP сервис коллектора
+- k8s/hpa.yaml: HPA (1-5 реплик, CPU 70%, Kafka lag 100)
+- k8s/analyzer-deployment.yaml: Deployment анализатора
+- k8s/dashboard-deployment.yaml: Deployment дашборда
+- k8s/dashboard-service.yaml: NodePort сервис дашборда (30501)
+
+**Git:** `chore: add Kubernetes manifests (Deployment, Service, HPA, ConfigMap)`

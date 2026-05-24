@@ -1,0 +1,9 @@
+# Namespace lab14 — изолированное пространство имён для всех ресурсов лабораторной работы.
+# Все последующие манифесты деплоятся в этот namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab14
+  labels:
+    project: lab14
+    course: data-pipelines
