@@ -1,0 +1,38 @@
+# Go
+*.exe
+*.out
+/bin/
+/vendor/
+*.test
+collector/internal/arrow/flight.pb.go
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+dist/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# Rust
+validator/target/
+validator/*.so
+validator/*.pyd
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Секреты и данные
+.env
+*.log
+logs/
+data/*.parquet
+data/*.arrow
+
+# Docker
+docker-volumes/
