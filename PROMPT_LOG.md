@@ -115,3 +115,21 @@ UserEvent, AggregatedWindow, PageStat, ShardInfo.
   через WaitGroup, HTTP /health + /ready на :8080
 
 **Git:** `feat: add event emitter with goroutines and graceful shutdown`
+
+---
+
+## Промпт 2.4 — Go: etcd координатор шардов
+
+**Дата:** 2026-05-24
+
+**Промпт:** Реализация координатора шардов через etcd для распределения
+партиций Kafka между несколькими экземплярами сборщика.
+
+**Результат:**
+- etcd/coordinator.go: Coordinator с lease TTL 30s, keepalive горутиной
+- Register: ключ /collectors/{id}, JSON-значение, автообновление lease
+- GetShards: детерминированное round-robin распределение партиций
+- WatchShards: реактивный канал при изменении состава коллекторов
+- Deregister: очистка при graceful shutdown
+
+**Git:** `feat: add etcd shard coordinator`
