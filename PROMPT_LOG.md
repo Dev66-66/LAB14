@@ -61,3 +61,21 @@ LAB14/, .gitignore, .env.example, README.md, PROMPT_LOG.md.
 - k8s/dashboard-service.yaml: NodePort сервис дашборда (30501)
 
 **Git:** `chore: add Kubernetes manifests (Deployment, Service, HPA, ConfigMap)`
+
+---
+
+## Промпт 2.1 — Go: domain модели
+
+**Дата:** 2026-05-24
+
+**Промпт:** Инициализация Go-модуля и создание domain-моделей:
+UserEvent, AggregatedWindow, PageStat, ShardInfo.
+
+**Результат:**
+- go.mod инициализирован (github.com/Dev66-66/LAB14/collector)
+- Зависимости: franz-go, etcd/client/v3, arrow/go/v15, uuid, godotenv, grpc
+- domain/event.go: EventType (6 констант), UserEvent, AggregatedWindow,
+  PageStat с JSON-тегами, конструктор NewUserEvent
+- domain/shard.go: ShardInfo
+
+**Git:** `feat: add UserEvent and AggregatedWindow domain models`
