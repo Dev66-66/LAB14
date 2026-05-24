@@ -21,3 +21,23 @@ LAB14/, .gitignore, .env.example, README.md, PROMPT_LOG.md.
 - Репозиторий подключён к https://github.com/Dev66-66/LAB14
 
 **Git:** `ccb54a4` — `chore: init repo structure, .gitignore, .env.example`
+
+---
+
+## Промпт 1.1 — Docker Compose: Redpanda и etcd
+
+**Дата:** 2026-05-24
+
+**Промпт:** Создание инфраструктурного слоя: Redpanda (Kafka-совместимый
+брокер) с инициализацией топика user-events (3 партиции, retention 1h)
+и etcd для координации сборщиков.
+
+**Результат:**
+- docker-compose.yml: сервисы redpanda, redpanda-init, etcd
+- redpanda: dev-container режим, 1GB RAM, healthcheck через rpk
+- redpanda-init: создаёт топик user-events автоматически при старте
+- etcd: bitnami/etcd:3.5, healthcheck через etcdctl
+- Все сервисы в сети pipeline-network
+- Named volumes: redpanda-data, etcd-data, parquet-data
+
+**Git:** `chore: add Docker Compose with Redpanda and etcd`

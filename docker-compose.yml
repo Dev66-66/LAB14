@@ -1,16 +1,83 @@
 version: '3.9'
 
 # Сервисы будут добавлены в следующих промптах:
-# - redpanda       (Kafka-совместимый брокер)
-# - redpanda-init  (создание топиков)
-# - etcd           (координация сборщиков)
 # - collector      (Go-эмулятор событий)
 # - aggregator     (Go-агрегатор с tumbling window)
 # - arrow-server   (Go Arrow Flight RPC сервер)
 # - analyzer       (Python Polars + DuckDB)
 # - dashboard      (Streamlit)
 
-services: {}
+services:
+
+  redpanda:
+    image: redpandadata/redpanda:v23.3.11
+    container_name: redpanda
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr internal://redpanda:8082,external://localhost:18082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --rpc-addr redpanda:33145
+      - --advertise-rpc-addr redpanda:33145
+      - --smp 1
+      - --memory 1G
+      - --mode dev-container
+      - --default-log-level=warn
+    ports:
+      - "19092:19092"
+      - "18082:18082"
+      - "18081:18081"
+      - "9644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health", "--api-urls", "localhost:9644"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pipeline-network
+
+  redpanda-init:
+    image: redpandadata/redpanda:v23.3.11
+    container_name: redpanda-init
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    command:
+      - rpk
+      - topic
+      - create
+      - user-events
+      - --brokers redpanda:9092
+      - --partitions 3
+      - --replicas 1
+      - --topic-config retention.ms=3600000
+    restart: on-failure
+    networks:
+      - pipeline-network
+
+  etcd:
+    image: bitnami/etcd:3.5
+    container_name: etcd
+    environment:
+      ALLOW_NONE_AUTHENTICATION: "yes"
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
+    volumes:
+      - etcd-data:/bitnami/etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pipeline-network
 
 networks:
   pipeline-network:
