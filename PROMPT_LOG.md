@@ -97,3 +97,21 @@ UserEvent, AggregatedWindow, PageStat, ShardInfo.
   GroupID из env KAFKA_GROUP_ID
 
 **Git:** `feat: add Kafka producer adapter (Redpanda)`
+
+---
+
+## Промпт 2.3 — Go: эмулятор событий
+
+**Дата:** 2026-05-24
+
+**Промпт:** Реализация эмулятора пользовательских событий с горутинами
+и graceful shutdown.
+
+**Результат:**
+- domain/emitter.go: Emitter с пулом 50 пользователей, 20 сессий,
+  Generate/GenerateBatch, случайные метаданные (device/browser/country)
+- cmd/main.go: N горутин-воркеров (N=KAFKA_PARTITIONS), пакетная
+  отправка (BATCH_SIZE=100), JSON-логирование, graceful shutdown
+  через WaitGroup, HTTP /health + /ready на :8080
+
+**Git:** `feat: add event emitter with goroutines and graceful shutdown`
