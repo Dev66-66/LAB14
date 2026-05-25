@@ -226,3 +226,22 @@ requirements.txt, Dockerfile анализатора.
   сборки PyO3 валидатора, непривилегированный пользователь
 
 **Git:** `feat: add Python domain models with type hints`
+
+---
+
+## Промпт 4.2 — Python: адаптеры
+
+**Дата:** 2026-05-25
+
+**Промпт:** Реализация Python-адаптеров: Arrow Flight клиент,
+Parquet-хранилище, DuckDB-анализатор.
+
+**Результат:**
+- adapters/arrow_client.py: ArrowFlightClient, fetch_windows,
+  _table_to_windows (Arrow Table → List[AggregatedWindow])
+- adapters/parquet_store.py: ParquetStore, save_windows (Polars → Parquet),
+  load_windows, _windows_to_dataframe
+- adapters/duckdb_analyzer.py: DuckDBAnalyzer, analyze_parquet (SQL с
+  DATE_TRUNC/PERCENTILE_CONT), compare_with_polars (бенчмарк DuckDB vs Polars)
+
+**Git:** `feat: add Polars transformer and DuckDB analyzer`
