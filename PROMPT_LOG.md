@@ -206,3 +206,23 @@ Go-сборщика.
 - docker/validator.Dockerfile: сборка через maturin в Docker
 
 **Git:** `feat: add Rust validation crate (PyO3)`
+
+---
+
+## Промпт 4.1 — Python: domain модели
+
+**Дата:** 2026-05-25
+
+**Промпт:** Создание Python domain-моделей с type hints и докстринами,
+requirements.txt, Dockerfile анализатора.
+
+**Результат:**
+- analyzer/requirements.txt: 14 зависимостей (polars, duckdb, pyarrow,
+  plotly, pandas, streamlit, kafka-python, pytest, black, flake8, isort)
+- analyzer/domain/models.py: EventType (Enum), UserEvent, PageStat,
+  AggregatedWindow, AnalysisResult — dataclass с type hints,
+  Google-style докстринги, PEP8
+- docker/analyzer.Dockerfile: python:3.12-slim + Rust + maturin для
+  сборки PyO3 валидатора, непривилегированный пользователь
+
+**Git:** `feat: add Python domain models with type hints`
