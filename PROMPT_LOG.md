@@ -245,3 +245,21 @@ Parquet-хранилище, DuckDB-анализатор.
   DATE_TRUNC/PERCENTILE_CONT), compare_with_polars (бенчмарк DuckDB vs Polars)
 
 **Git:** `feat: add Polars transformer and DuckDB analyzer`
+
+---
+
+## Промпт 4.3 — Python: use cases
+
+**Дата:** 2026-05-25
+
+**Промпт:** Реализация use cases: DataTransformer (Polars очистка),
+DataAnalyzer (DuckDB SQL + бенчмарк), конвейер pipeline.
+
+**Результат:**
+- usecases/transformer.py: DataTransformer, transform (6 шагов очистки),
+  aggregate_by_hour, get_event_distribution, document_cleaning_steps
+- usecases/analyzer.py: DataAnalyzer, analyze (AnalysisResult),
+  benchmark_polars_vs_duckdb ({"polars_ms", "duckdb_ms", "speedup"})
+- usecases/pipeline.py: run_pipeline (6 шагов), бесконечный цикл 30s
+
+**Git:** `feat: add Polars transformer and DuckDB analyzer`
