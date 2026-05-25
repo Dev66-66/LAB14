@@ -133,3 +133,20 @@ UserEvent, AggregatedWindow, PageStat, ShardInfo.
 - Deregister: очистка при graceful shutdown
 
 **Git:** `feat: add etcd shard coordinator`
+
+---
+
+## Промпт 2.5 — Go: tumbling window агрегатор
+
+**Дата:** 2026-05-25
+
+**Промпт:** Реализация агрегатора с tumbling window для предагрегации
+событий на стороне Go перед отправкой в Python.
+
+**Результат:**
+- aggregator/window.go: Window с thread-safe Add, Aggregate (топ-5 страниц,
+  уникальные пользователи, EventCounts, AvgDuration)
+- aggregator/tumbling.go: TumblingAggregator, фоновая горутина смены окон,
+  windowSize из env WINDOW_SIZE_SECONDS (дефолт 10s), JSON-логирование
+
+**Git:** `feat: add tumbling window aggregator (10s)`
