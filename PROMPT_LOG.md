@@ -187,3 +187,22 @@ Go-сборщика.
 - docker-compose.yml: сервис collector добавлен
 
 **Git:** `fix: add buffer tuning and batch write optimization`
+
+---
+
+## Промпт 3.1 — Rust: PyO3 валидатор
+
+**Дата:** 2026-05-25
+
+**Промпт:** Создание Rust-крейта для валидации событий с интеграцией
+в Python через PyO3.
+
+**Результат:**
+- validator/Cargo.toml: pyo3 0.21 (abi3-py312), serde, serde_json, regex, cdylib
+- validator/src/lib.rs: validate_event (6 правил валидации),
+  validate_batch (пакетная валидация), PyO3 модуль event_validator
+- validator/pyproject.toml: maturin конфигурация
+- validator/build.sh: скрипт сборки
+- docker/validator.Dockerfile: сборка через maturin в Docker
+
+**Git:** `feat: add Rust validation crate (PyO3)`
