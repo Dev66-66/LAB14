@@ -50,15 +50,19 @@ class DataTransformer:
         ]
 
         # Шаг 1: конвертация в DataFrame.
-        df = pl.DataFrame(rows) if rows else pl.DataFrame(
-            schema={
-                "window_start": pl.Datetime("ms", "UTC"),
-                "window_end": pl.Datetime("ms", "UTC"),
-                "total_events": pl.Int64,
-                "unique_users": pl.Int64,
-                "avg_duration_ms": pl.Float64,
-                "event_counts": pl.Utf8,
-            }
+        df = (
+            pl.DataFrame(rows)
+            if rows
+            else pl.DataFrame(
+                schema={
+                    "window_start": pl.Datetime("ms", "UTC"),
+                    "window_end": pl.Datetime("ms", "UTC"),
+                    "total_events": pl.Int64,
+                    "unique_users": pl.Int64,
+                    "avg_duration_ms": pl.Float64,
+                    "event_counts": pl.Utf8,
+                }
+            )
         )
         before = len(df)
         self._cleaning_log.append(("Конвертация в DataFrame", before, before))
@@ -85,7 +89,9 @@ class DataTransformer:
                 pl.col("window_end").cast(pl.Datetime("ms", "UTC")),
             ]
         )
-        self._cleaning_log.append(("Приведение типов datetime[ms, UTC]", before, before))
+        self._cleaning_log.append(
+            ("Приведение типов datetime[ms, UTC]", before, before)
+        )
 
         # Шаг 5: window_duration_sec через разность Int64-представлений (ms → s).
         df = df.with_columns(
@@ -130,9 +136,7 @@ class DataTransformer:
             DataFrame с почасовой агрегацией, отсортированный по часу.
         """
         return (
-            df.with_columns(
-                pl.col("window_start").dt.truncate("1h").alias("hour")
-            )
+            df.with_columns(pl.col("window_start").dt.truncate("1h").alias("hour"))
             .group_by("hour")
             .agg(
                 [
@@ -185,7 +189,9 @@ class DataTransformer:
         """
         steps: List[str] = []
         for i, (description, before, after) in enumerate(self._cleaning_log, start=1):
-            steps.append(f"Шаг {i}: {description} (было {before} строк → стало {after} строк)")
+            steps.append(
+                f"Шаг {i}: {description} (было {before} строк → стало {after} строк)"
+            )
         steps.append(
             f"Итого: финальный DataFrame содержит {len(df)} строк, "
             f"{len(df.columns)} колонок"

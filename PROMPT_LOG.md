@@ -263,3 +263,19 @@ DataAnalyzer (DuckDB SQL + бенчмарк), конвейер pipeline.
 - usecases/pipeline.py: run_pipeline (6 шагов), бесконечный цикл 30s
 
 **Git:** `feat: add Polars transformer and DuckDB analyzer`
+
+---
+
+## Промпт 4.4 — Python: форматирование PEP8
+
+**Дата:** 2026-05-25
+
+**Промпт:** Применение black, isort, flake8 ко всему Python-коду.
+
+**Результат:**
+- analyzer/.flake8: max-line-length=88, exclude .venv/__pycache__
+- analyzer/pyproject.toml: black line-length=88, isort profile=black
+- Весь Python-код отформатирован через black и isort
+- flake8 --select=E9,F63,F7,F82: 0 критических ошибок
+
+**Git:** `style: apply black, isort, flake8 to all Python code`

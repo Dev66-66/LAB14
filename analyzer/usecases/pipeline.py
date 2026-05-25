@@ -47,8 +47,9 @@ def run_pipeline() -> None:
 
         # Шаг 2: валидация через Rust PyO3 (опционально).
         try:
-            import event_validator  # type: ignore[import]
             import json
+
+            import event_validator  # type: ignore[import]
 
             validated = []
             for w in windows:

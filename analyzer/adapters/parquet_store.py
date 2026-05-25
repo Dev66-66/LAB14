@@ -106,7 +106,9 @@ class ParquetStore:
         windows: List[AggregatedWindow] = []
         for row in df.iter_rows(named=True):
             top_pages_raw = json.loads(row["top_pages"]) if row["top_pages"] else []
-            top_pages = [PageStat(page=p["page"], count=p["count"]) for p in top_pages_raw]
+            top_pages = [
+                PageStat(page=p["page"], count=p["count"]) for p in top_pages_raw
+            ]
             windows.append(
                 AggregatedWindow(
                     window_start=row["window_start"],

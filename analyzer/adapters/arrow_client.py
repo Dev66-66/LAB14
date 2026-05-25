@@ -7,7 +7,7 @@ from typing import List
 import pyarrow as pa
 import pyarrow.flight as flight
 
-from domain.models import AggregatedWindow, PageStat
+from domain.models import AggregatedWindow
 
 
 class ArrowFlightClient:

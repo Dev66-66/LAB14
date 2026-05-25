@@ -1,10 +1,7 @@
 """Use case: аналитическая обработка данных."""
 
 import logging
-from datetime import datetime
 from typing import Dict, List
-
-import polars as pl
 
 from adapters.duckdb_analyzer import DuckDBAnalyzer
 from domain.models import AggregatedWindow, AnalysisResult
@@ -17,7 +14,7 @@ class DataAnalyzer:
 
     def __init__(self, duckdb_analyzer: DuckDBAnalyzer) -> None:
         """Args:
-            duckdb_analyzer: Экземпляр DuckDB-адаптера.
+        duckdb_analyzer: Экземпляр DuckDB-адаптера.
         """
         self._duckdb = duckdb_analyzer
 
