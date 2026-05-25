@@ -1,7 +1,6 @@
 version: '3.9'
 
 # Сервисы будут добавлены в следующих промптах:
-# - collector      (Go-эмулятор событий)
 # - aggregator     (Go-агрегатор с tumbling window)
 # - arrow-server   (Go Arrow Flight RPC сервер)
 # - analyzer       (Python Polars + DuckDB)
@@ -78,6 +77,24 @@ services:
       retries: 5
     networks:
       - pipeline-network
+
+  collector:
+    build:
+      context: ./collector
+      dockerfile: ../docker/collector.Dockerfile
+    image: lab14-collector:latest
+    container_name: lab14-collector
+    env_file: .env
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+      etcd:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - pipeline-network
+    restart: unless-stopped
 
 networks:
   pipeline-network:

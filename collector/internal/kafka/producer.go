@@ -86,6 +86,15 @@ func (p *Producer) SendBatch(ctx context.Context, events []domain.UserEvent) err
 	return nil
 }
 
+// Flush принудительно сбрасывает все буферизованные записи брокеру.
+// Вызывать перед Close() при graceful shutdown.
+func (p *Producer) Flush(ctx context.Context) error {
+	if err := p.client.Flush(ctx); err != nil {
+		return fmt.Errorf("kafka: Flush: %w", err)
+	}
+	return nil
+}
+
 // Close корректно закрывает соединение с брокером.
 func (p *Producer) Close() {
 	p.client.Close()

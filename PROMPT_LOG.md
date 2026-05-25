@@ -168,3 +168,22 @@ UserEvent, AggregatedWindow, PageStat, ShardInfo.
   Serve (gRPC на ARROW_FLIGHT_PORT)
 
 **Git:** `feat: add Apache Arrow Flight RPC server`
+
+---
+
+## Промпт 2.7 — Go: буферизация и Dockerfile
+
+**Дата:** 2026-05-25
+
+**Промпт:** Оптимизация буферизации Kafka-продюсера и контейнеризация
+Go-сборщика.
+
+**Результат:**
+- kafka/producer.go: добавлен метод Flush для принудительного сброса
+  буфера перед graceful shutdown
+- docker/collector.Dockerfile: двухэтапная сборка (golang:1.22-alpine
+  → alpine:3.19), CGO_ENABLED=0, -ldflags="-w -s", непривилегированный
+  пользователь, HEALTHCHECK через wget
+- docker-compose.yml: сервис collector добавлен
+
+**Git:** `fix: add buffer tuning and batch write optimization`

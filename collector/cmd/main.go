@@ -59,6 +59,12 @@ func main() {
 	// 7. Graceful shutdown.
 	logJSON("INFO", "shutdown signal received, waiting for workers")
 	wg.Wait()
+
+	flushCtx, flushCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer flushCancel()
+	if err := producer.Flush(flushCtx); err != nil {
+		logJSON("WARN", "producer flush: "+err.Error())
+	}
 	producer.Close()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
