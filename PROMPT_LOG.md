@@ -150,3 +150,21 @@ UserEvent, AggregatedWindow, PageStat, ShardInfo.
   windowSize из env WINDOW_SIZE_SECONDS (дефолт 10s), JSON-логирование
 
 **Git:** `feat: add tumbling window aggregator (10s)`
+
+---
+
+## Промпт 2.6 — Go: Apache Arrow Flight RPC сервер
+
+**Дата:** 2026-05-25
+
+**Промпт:** Реализация Arrow Flight RPC сервера для передачи
+агрегированных окон Python-клиенту без сериализации через JSON.
+
+**Результат:**
+- arrow/schema.go: EventSchema (7 колонок), WindowSchema (5 колонок)
+- arrow/server.go: FlightServer с буфером окон (RWMutex),
+  GetFlightInfo (дескриптор "aggregated_windows"),
+  DoGet (сериализация в RecordBatch + стриминг + очистка буфера),
+  Serve (gRPC на ARROW_FLIGHT_PORT)
+
+**Git:** `feat: add Apache Arrow Flight RPC server`
