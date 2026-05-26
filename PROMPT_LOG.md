@@ -445,3 +445,42 @@ domain-модели.
 **Итоговое количество коммитов:** 25
 
 **Git:** `docs: finalize PROMPT_LOG`
+
+---
+
+## Промпт 8.1 — Код-ревью
+
+**Дата:** 2026-05-27
+
+**Промпт:** Полное код-ревью проекта для выявления конфликтов версий
+и критических ошибок.
+
+**Найдено и исправлено:**
+
+**CRITICAL:**
+- docker/collector.Dockerfile: build context `./collector`, но COPY писал
+  `collector/go.mod` — путь не существовал в контексте сборки →
+  исправлено на `COPY go.mod go.sum ./` и `COPY . ./`
+- docker/collector.Dockerfile: `golang:1.22-alpine` не может собрать модуль
+  с директивой `go 1.26.1` в go.mod → обновлено до `golang:1.26-alpine`
+- docker-compose.yml: `dashboard: depends_on: analyzer` — сервис `analyzer`
+  не был определён → добавлен сервис analyzer (build context `.`,
+  dockerfile `docker/analyzer.Dockerfile`, volume parquet-data)
+- docker/dashboard.Dockerfile: `HEALTHCHECK CMD curl ...` — `curl` не
+  установлен в `python:3.12-slim` → добавлен `apt-get install curl`
+
+**HIGH:**
+- collector/internal/etcd/coordinator.go: `WatchShards` — `ch <- shard`
+  после `case <-ch:` был блокирующим вызовом вне select, риск зависания
+  при отмене контекста → заменён вложенным select с case ctx.Done()
+- analyzer/usecases/pipeline.py: `datetime.utcnow()` deprecated в Python
+  3.12, scheduled for removal → заменено на `datetime.now(timezone.utc)`
+- analyzer/domain/models.py: `default_factory=datetime.utcnow` в
+  AnalysisResult.generated_at — та же проблема → исправлено на lambda
+
+**Проверки после исправлений:**
+- `go build ./...` — успешно
+- `pytest tests/ -q` — 10 passed
+- `flake8 domain/models.py usecases/pipeline.py` — 0 ошибок
+
+**Git:** `fix: code review — Dockerfile paths, missing analyzer service, datetime deprecation, WatchShards race`
