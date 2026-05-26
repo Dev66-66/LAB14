@@ -322,3 +322,22 @@ DataAnalyzer (DuckDB SQL + бенчмарк), конвейер pipeline.
 - docker-compose.yml: сервис dashboard добавлен (порт 8501, parquet-data)
 
 **Git:** `feat: add Streamlit real-time dashboard`
+
+---
+
+## Промпт 6.1 — Тесты Go
+
+**Дата:** 2026-05-26
+
+**Промпт:** Юнит-тесты для Go-компонентов: агрегатор и эмулятор.
+
+**Результат:**
+- aggregator/export_test.go: NewTumblingAggregatorWithSize (test helper,
+  стандартный паттерн Go для экспонирования внутреннего конструктора)
+- aggregator/window_test.go: 6 тестов (TotalEvents, UniqueUsers,
+  EventCounts, TopPages, AvgDuration, TumblingAggregator output 100ms)
+- domain/emitter_test.go: 3 теста (ValidEvent, BatchCount, PageSlash)
+- Используется Go 1.26 синтаксис: range N, t.Context()
+- go test ./internal/... -v: все 9 тестов PASS
+
+**Git:** `test: add Go unit tests (aggregator, emitter)`
