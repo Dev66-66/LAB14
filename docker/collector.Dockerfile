@@ -1,13 +1,15 @@
 # ── Этап 1: сборка бинарника ──────────────────────────────────────────────────
-FROM golang:1.22-alpine AS builder
+# go.mod объявляет go 1.26.1, поэтому используем совместимый тулчейн.
+# Build context = ./collector, поэтому пути COPY — без префикса collector/.
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /build
 
 # Кешируем зависимости отдельным слоем — пересборка только при изменении go.mod.
-COPY collector/go.mod collector/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
-COPY collector/ ./
+COPY . ./
 
 # CGO_ENABLED=0 для статического бинарника; -w -s убирают отладочные символы.
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o collector ./cmd

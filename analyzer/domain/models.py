@@ -1,7 +1,7 @@
 """Доменные модели для анализатора пользовательских событий."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, List, Optional
 
@@ -96,4 +96,6 @@ class AnalysisResult:
     avg_events_per_window: float
     peak_window: Optional[AggregatedWindow]
     event_distribution: Dict[str, int]
-    generated_at: datetime = field(default_factory=datetime.utcnow)
+    generated_at: datetime = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )

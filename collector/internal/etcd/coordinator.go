@@ -155,12 +155,17 @@ func (c *Coordinator) WatchShards(ctx context.Context, totalPartitions int) <-ch
 				if err != nil {
 					continue
 				}
-				// Неблокирующая отправка: если получатель не читает,
-				// старое значение вытесняется новым.
+				// Неблокирующая отправка: если канал полон, вытесняем
+				// старое значение новым. Второй select защищает от
+				// блокировки при отмене ctx после дрейна канала.
 				select {
 				case ch <- shard:
 				case <-ch:
-					ch <- shard
+					select {
+					case ch <- shard:
+					case <-ctx.Done():
+						return
+					}
 				case <-ctx.Done():
 					return
 				}

@@ -2,7 +2,7 @@
 
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from adapters.arrow_client import ArrowFlightClient
 from adapters.duckdb_analyzer import DuckDBAnalyzer
@@ -79,7 +79,7 @@ def run_pipeline() -> None:
             logger.info(step)
 
         # Шаг 4: сохранение в Parquet.
-        filename = f"windows_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        filename = f"windows_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
         parquet_path = parquet_store.save_windows(windows, filename)
         logger.info("saved %d rows to %s", len(df), parquet_path)
 

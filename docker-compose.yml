@@ -1,11 +1,5 @@
 version: '3.9'
 
-# Сервисы будут добавлены в следующих промптах:
-# - aggregator     (Go-агрегатор с tumbling window)
-# - arrow-server   (Go Arrow Flight RPC сервер)
-# - analyzer       (Python Polars + DuckDB)
-# - dashboard      (Streamlit)
-
 services:
 
   redpanda:
@@ -92,6 +86,26 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+
+  analyzer:
+    build:
+      context: .
+      dockerfile: docker/analyzer.Dockerfile
+    image: lab14-analyzer:latest
+    container_name: lab14-analyzer
+    env_file: .env
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+      etcd:
+        condition: service_healthy
+    volumes:
+      - parquet-data:/app/data
+    environment:
+      PARQUET_OUTPUT_DIR: /app/data
     networks:
       - pipeline-network
     restart: unless-stopped
