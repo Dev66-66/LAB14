@@ -279,3 +279,27 @@ DataAnalyzer (DuckDB SQL + бенчмарк), конвейер pipeline.
 - flake8 --select=E9,F63,F7,F82: 0 критических ошибок
 
 **Git:** `style: apply black, isort, flake8 to all Python code`
+
+---
+
+## Промпт 5.1 — Python: модуль визуализации Plotly
+
+**Дата:** 2026-05-26
+
+**Промпт:** Создание модуля визуализации analyzer/presentation/ с пятью
+типами графиков через Plotly: временной ряд, круговая диаграмма,
+тепловая карта активности, гистограмма длительности, сравнение
+производительности Polars vs DuckDB.
+
+**Результат:**
+- presentation/__init__.py: экспорт ChartBuilder
+- presentation/charts.py: ChartBuilder с 5 методами:
+  - events_timeseries: px.line + scatter-маркеры по window_start
+  - event_type_distribution: px.pie (donut, hole=0.35, Set2)
+  - unique_users_heatmap: go.Heatmap час × день недели (pivot pandas)
+  - duration_histogram: px.histogram (40 бинов, vline среднего)
+  - performance_comparison: go.Bar Polars vs DuckDB со speedup subtitle
+- _save: HTML всегда, PNG через try/except (kaleido опционален)
+- OUTPUT_DIR: ./data/charts, создаётся при импорте
+
+**Git:** `feat: add Plotly visualizations (timeseries, heatmap, histogram)`
