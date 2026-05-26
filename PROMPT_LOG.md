@@ -363,3 +363,19 @@ domain-модели.
 - pytest tests/ -v: все 10 тестов PASS
 
 **Git:** `test: add Python pytest (transformer, analyzer, models)`
+
+---
+
+## Промпт 7.1 — Архитектурная документация
+
+**Дата:** 2026-05-26
+
+**Промпт:** Создание docs/ARCHITECTURE.md с Mermaid-диаграммой,
+описанием компонентов и потока данных.
+
+**Результат:**
+- docs/ARCHITECTURE.md: 11 разделов, Mermaid flowchart LR,
+  таблицы компонентов/топиков/форматов/производительности,
+  описание tumbling window, etcd координации, деплоя
+
+**Git:** `docs: add architecture documentation with Mermaid diagram`
