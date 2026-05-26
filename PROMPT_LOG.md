@@ -303,3 +303,22 @@ DataAnalyzer (DuckDB SQL + бенчмарк), конвейер pipeline.
 - OUTPUT_DIR: ./data/charts, создаётся при импорте
 
 **Git:** `feat: add Plotly visualizations (timeseries, heatmap, histogram)`
+
+---
+
+## Промпт 5.2 — Streamlit дашборд
+
+**Дата:** 2026-05-26
+
+**Промпт:** Создание Streamlit дашборда с real-time обновлением.
+
+**Результат:**
+- dashboard/app.py: main() с авторефрешем (st.rerun), sidebar с
+  фильтрами (тип события, диапазон дат), 4 KPI-метрики (st.metric),
+  временной ряд, pie chart, топ-10 страниц, таблица производительности
+- dashboard/requirements.txt: 4 зависимости (streamlit, polars, plotly,
+  python-dotenv)
+- docker/dashboard.Dockerfile: python:3.12-slim, appuser, HEALTHCHECK curl
+- docker-compose.yml: сервис dashboard добавлен (порт 8501, parquet-data)
+
+**Git:** `feat: add Streamlit real-time dashboard`

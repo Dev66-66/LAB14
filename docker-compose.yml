@@ -96,6 +96,25 @@ services:
       - pipeline-network
     restart: unless-stopped
 
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/dashboard.Dockerfile
+    image: lab14-dashboard:latest
+    container_name: lab14-dashboard
+    depends_on:
+      - analyzer
+    ports:
+      - "8501:8501"
+    volumes:
+      - parquet-data:/app/data
+    environment:
+      PARQUET_OUTPUT_DIR: /app/data
+      STREAMLIT_REFRESH_INTERVAL: "5"
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+
 networks:
   pipeline-network:
     driver: bridge
