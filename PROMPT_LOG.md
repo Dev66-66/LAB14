@@ -341,3 +341,25 @@ DataAnalyzer (DuckDB SQL + бенчмарк), конвейер pipeline.
 - go test ./internal/... -v: все 9 тестов PASS
 
 **Git:** `test: add Go unit tests (aggregator, emitter)`
+
+---
+
+## Промпт 6.2 — Тесты Python
+
+**Дата:** 2026-05-26
+
+**Промпт:** pytest-тесты для Python-компонентов: transformer, analyzer,
+domain-модели.
+
+**Результат:**
+- tests/__init__.py: маркер пакета (пустой)
+- tests/test_transformer.py: 5 тестов (дубликаты, фильтрация нулей,
+  events_per_second, агрегация по часам, шаги очистки)
+- tests/test_analyzer.py: 2 теста (benchmark keys, AnalysisResult)
+- tests/test_models.py: 3 теста (EventType values, строковая совместимость,
+  создание AggregatedWindow)
+- Исправлены domain/__init__.py, usecases/__init__.py, adapters/__init__.py:
+  заменены абсолютные пути `from analyzer.X` на относительные импорты `from .X`
+- pytest tests/ -v: все 10 тестов PASS
+
+**Git:** `test: add Python pytest (transformer, analyzer, models)`

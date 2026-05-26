@@ -1,6 +1,6 @@
 """Доменный слой анализатора."""
 
-from analyzer.domain.models import (
+from .models import (
     AggregatedWindow,
     AnalysisResult,
     EventType,
