@@ -73,7 +73,7 @@ flowchart LR
 
 | Компонент | Версия | Назначение |
 |---|---|---|
-| **Go** | 1.22 | Коллектор, агрегатор, Arrow Flight RPC-сервер |
+| **Go** | 1.26 | Коллектор, агрегатор, Arrow Flight RPC-сервер |
 | **Python** | 3.12 | Анализатор данных, Streamlit-дашборд |
 | **Rust** | 1.78 | PyO3-расширение для валидации событий |
 | **Redpanda** | v23.3.11 | Kafka-совместимый брокер (топик `user-events`, 3 партиции) |
@@ -157,7 +157,7 @@ LAB14/
 │   └── dashboard-service.yaml   # NodePort 30501
 │
 ├── docker/
-│   ├── collector.Dockerfile     # двухэтапная сборка Go (golang:1.22 → alpine:3.19)
+│   ├── collector.Dockerfile     # двухэтапная сборка Go (golang:1.26 → alpine:3.19)
 │   ├── analyzer.Dockerfile      # python:3.12-slim + Rust + maturin
 │   ├── validator.Dockerfile     # maturin build
 │   └── dashboard.Dockerfile     # python:3.12-slim
