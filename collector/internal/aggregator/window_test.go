@@ -109,7 +109,7 @@ func TestTumblingAggregator_OutputsWindow(t *testing.T) {
 		if result.TotalEvents < 10 {
 			t.Errorf("TotalEvents: want >=10, got %d", result.TotalEvents)
 		}
-	default:
+	case <-time.After(500 * time.Millisecond):
 		t.Fatal("no result in output channel after window rotation")
 	}
 }

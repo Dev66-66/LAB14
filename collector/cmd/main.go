@@ -13,6 +13,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Dev66-66/LAB14/collector/internal/aggregator"
+	arrow_flight "github.com/Dev66-66/LAB14/collector/internal/arrow"
 	"github.com/Dev66-66/LAB14/collector/internal/domain"
 	"github.com/Dev66-66/LAB14/collector/internal/kafka"
 	"github.com/joho/godotenv"
@@ -22,29 +24,77 @@ func main() {
 	// 1. Загрузка .env; ошибка игнорируется (файл может отсутствовать в k8s).
 	_ = godotenv.Load()
 
-	// 2. Создание Producer.
+	// 2. Создание компонентов конвейера.
 	producer, err := kafka.NewProducer()
 	if err != nil {
 		log.Fatalf("failed to create producer: %v", err)
 	}
 
-	// 3. Создание Emitter.
-	emitter := domain.NewEmitter()
+	consumer, err := kafka.NewConsumer()
+	if err != nil {
+		log.Fatalf("failed to create consumer: %v", err)
+	}
 
-	// 4. Контекст, отменяемый по SIGINT / SIGTERM.
+	emitter := domain.NewEmitter()
+	agg := aggregator.NewTumblingAggregator()
+	flightSrv := arrow_flight.NewFlightServer()
+
+	// 3. Контекст, отменяемый по SIGINT / SIGTERM.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	// 5. Запуск HTTP-сервера для Kubernetes liveness / readiness probe.
+	// 4. HTTP-сервер для Kubernetes liveness / readiness probe.
 	httpSrv := startHTTPServer(":8080")
-
-	// Количество воркеров = KAFKA_PARTITIONS (дефолт 3).
-	numWorkers := getEnvInt("KAFKA_PARTITIONS", 3)
-	batchSize := getEnvInt("BATCH_SIZE", 100)
 
 	var wg sync.WaitGroup
 
-	// 6. Запуск N горутин-воркеров.
+	// 5. Arrow Flight RPC-сервер (Python-клиент читает агрегаты отсюда).
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := flightSrv.Serve(ctx); err != nil && ctx.Err() == nil {
+			logJSONf("ERROR", "arrow flight server: "+err.Error())
+		}
+	}()
+
+	// 6. Tumbling window агрегатор (ротирует окна каждые WINDOW_SIZE_SECONDS).
+	agg.Start(ctx)
+
+	// 7. Перекладывает готовые окна из агрегатора в буфер Arrow Flight сервера.
+	go func() {
+		for w := range agg.Output() {
+			flightSrv.AddWindow(w)
+		}
+	}()
+
+	// 8. Kafka Consumer → Aggregator: читает события из Redpanda и агрегирует.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			events, err := consumer.ReadEvents(ctx)
+			if err != nil {
+				if ctx.Err() != nil {
+					return
+				}
+				logJSONf("WARN", "consumer read: "+err.Error())
+				continue
+			}
+			for _, e := range events {
+				agg.Add(e)
+			}
+		}
+	}()
+
+	// 9. Emitter воркеры → Kafka Producer.
+	numWorkers := getEnvInt("KAFKA_PARTITIONS", 3)
+	batchSize := getEnvInt("BATCH_SIZE", 100)
+
 	for i := 1; i <= numWorkers; i++ {
 		wg.Add(1)
 		go func(workerID int) {
@@ -56,9 +106,11 @@ func main() {
 	// Ждём сигнала завершения.
 	<-ctx.Done()
 
-	// 7. Graceful shutdown.
+	// 10. Graceful shutdown.
 	logJSON("INFO", "shutdown signal received, waiting for workers")
 	wg.Wait()
+
+	consumer.Close()
 
 	flushCtx, flushCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer flushCancel()
@@ -84,7 +136,6 @@ func runWorker(ctx context.Context, workerID, batchSize int, producer *kafka.Pro
 
 		batch := emitter.GenerateBatch(batchSize)
 		if err := producer.SendBatch(ctx, batch); err != nil {
-			// Контекст отменён во время отправки — выходим без лога ошибки.
 			if ctx.Err() != nil {
 				return
 			}
