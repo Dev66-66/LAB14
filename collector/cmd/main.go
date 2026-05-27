@@ -53,7 +53,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		if err := flightSrv.Serve(ctx); err != nil && ctx.Err() == nil {
-			logJSONf("ERROR", "arrow flight server: "+err.Error())
+			logJSON("ERROR", "arrow flight server: "+err.Error())
 		}
 	}()
 
@@ -61,7 +61,10 @@ func main() {
 	agg.Start(ctx)
 
 	// 7. Перекладывает готовые окна из агрегатора в буфер Arrow Flight сервера.
+	// agg.Output() закрывается агрегатором после финального flush при отмене ctx.
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for w := range agg.Output() {
 			flightSrv.AddWindow(w)
 		}
@@ -82,7 +85,7 @@ func main() {
 				if ctx.Err() != nil {
 					return
 				}
-				logJSONf("WARN", "consumer read: "+err.Error())
+				logJSON("WARN", "consumer read: "+err.Error())
 				continue
 			}
 			for _, e := range events {
@@ -110,7 +113,17 @@ func main() {
 	logJSON("INFO", "shutdown signal received, waiting for workers")
 	wg.Wait()
 
-	consumer.Close()
+	// consumer.Close() коммитит оффсеты по сети — ограничиваем ожидание.
+	consumerCloseDone := make(chan struct{})
+	go func() {
+		consumer.Close()
+		close(consumerCloseDone)
+	}()
+	select {
+	case <-consumerCloseDone:
+	case <-time.After(5 * time.Second):
+		logJSON("WARN", "consumer close timed out")
+	}
 
 	flushCtx, flushCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer flushCancel()
@@ -139,7 +152,7 @@ func runWorker(ctx context.Context, workerID, batchSize int, producer *kafka.Pro
 			if ctx.Err() != nil {
 				return
 			}
-			logJSONf("ERROR", fmt.Sprintf("worker %d: send batch failed: %v", workerID, err))
+			logJSON("ERROR", fmt.Sprintf("worker %d: send batch failed: %v", workerID, err))
 			continue
 		}
 
@@ -196,8 +209,6 @@ func logJSON(level, msg string) {
 	b, _ := json.Marshal(rec)
 	fmt.Println(string(b))
 }
-
-func logJSONf(level, msg string) { logJSON(level, msg) }
 
 func getEnvInt(key string, fallback int) int {
 	if v := os.Getenv(key); v != "" {

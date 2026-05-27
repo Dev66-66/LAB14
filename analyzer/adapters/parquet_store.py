@@ -62,6 +62,9 @@ class ParquetStore:
             top_pages_json = json.dumps(
                 [{"page": p.page, "count": p.count} for p in w.top_pages]
             )
+            event_counts_json = json.dumps(
+                {str(k): int(v) for k, v in w.event_counts.items()}
+            )
             rows.append(
                 {
                     "window_start": w.window_start,
@@ -70,6 +73,7 @@ class ParquetStore:
                     "unique_users": w.unique_users,
                     "avg_duration_ms": w.avg_duration_ms,
                     "top_pages": top_pages_json,
+                    "event_counts": event_counts_json,
                 }
             )
 
@@ -82,6 +86,7 @@ class ParquetStore:
                     "unique_users": pl.Int64,
                     "avg_duration_ms": pl.Float64,
                     "top_pages": pl.Utf8,
+                    "event_counts": pl.Utf8,
                 }
             )
 
@@ -109,12 +114,13 @@ class ParquetStore:
             top_pages = [
                 PageStat(page=p["page"], count=p["count"]) for p in top_pages_raw
             ]
+            raw_counts = json.loads(row.get("event_counts") or "{}") if row.get("event_counts") else {}
             windows.append(
                 AggregatedWindow(
                     window_start=row["window_start"],
                     window_end=row["window_end"],
                     total_events=row["total_events"],
-                    event_counts={},
+                    event_counts={k: int(v) for k, v in raw_counts.items()},
                     unique_users=row["unique_users"],
                     avg_duration_ms=row["avg_duration_ms"],
                     top_pages=top_pages,

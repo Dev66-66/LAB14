@@ -35,7 +35,9 @@ def load_data() -> pl.DataFrame | None:
         return None
     try:
         frames = [pl.read_parquet(f) for f in files]
-        return pl.concat(frames).sort("window_start")
+        # diagonal_relaxed заполняет отсутствующие колонки (например, event_counts
+        # в файлах, записанных до добавления колонки) значением null вместо ошибки.
+        return pl.concat(frames, how="diagonal_relaxed").sort("window_start")
     except Exception:
         return None
 
@@ -189,6 +191,56 @@ def render_top_pages(df: pl.DataFrame) -> None:
     st.plotly_chart(fig, use_container_width=True)
 
 
+def render_event_type_distribution(df: pl.DataFrame, selected_types: list) -> None:
+    """Отрисовывает распределение событий по типам с фильтром выбранных типов.
+
+    Парсит колонку event_counts (JSON) из каждого окна, суммирует по типам
+    и отображает горизонтальный bar chart только для выбранных типов.
+
+    Args:
+        df: DataFrame с колонкой event_counts (JSON-строка).
+        selected_types: Список типов событий для отображения.
+    """
+    totals: dict = {}
+    for row in df.iter_rows(named=True):
+        raw = row.get("event_counts") or "{}"
+        try:
+            counts = json.loads(raw)
+        except (json.JSONDecodeError, TypeError):
+            counts = {}
+        for event_type, cnt in counts.items():
+            totals[event_type] = totals.get(event_type, 0) + int(cnt)
+
+    if not totals:
+        st.info("Нет данных о типах событий (поле event_counts отсутствует в Parquet).")
+        return
+
+    filtered = {k: v for k, v in totals.items() if k in selected_types}
+    if not filtered:
+        st.info("Выбранные типы событий не найдены в данных.")
+        return
+
+    sorted_items = sorted(filtered.items(), key=lambda x: x[1])
+    event_names = [k for k, _ in sorted_items]
+    event_counts_vals = [v for _, v in sorted_items]
+
+    fig = px.bar(
+        x=event_counts_vals,
+        y=event_names,
+        orientation="h",
+        title=f"Распределение событий по типам (фильтр: {len(selected_types)} из {len(_EVENT_TYPES)})",
+        labels={"x": "Количество событий", "y": "Тип события"},
+        color=event_counts_vals,
+        color_continuous_scale="Viridis",
+    )
+    fig.update_layout(
+        showlegend=False,
+        coloraxis_showscale=False,
+        margin={"t": 40, "b": 30},
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
 def render_performance_table(df: pl.DataFrame) -> None:
     """Отрисовывает таблицу производительности окон (sortable).
 
@@ -227,11 +279,11 @@ def main() -> None:
     with st.sidebar:
         st.header("Настройки")
 
-        st.multiselect(
+        selected_event_types = st.multiselect(
             "Тип события",
             options=_EVENT_TYPES,
             default=_EVENT_TYPES,
-            help="Фильтр по типу события (применяется к top_pages)",
+            help="Фильтр по типу события — влияет на график распределения событий",
         )
 
         today = datetime.now(tz=timezone.utc).date()
@@ -282,6 +334,9 @@ def main() -> None:
         render_timeseries(df)
     with col2:
         render_event_distribution(df)
+
+    st.divider()
+    render_event_type_distribution(df, selected_event_types)
 
     render_top_pages(df)
 

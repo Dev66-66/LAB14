@@ -97,7 +97,16 @@ func (a *TumblingAggregator) publish(agg domain.AggregatedWindow) {
 	select {
 	case a.output <- agg:
 	default:
-		// Канал переполнен — получатель не успевает; пропускаем агрегат.
+		// Канал переполнен — логируем потерю, чтобы она не была невидимой.
+		rec := map[string]any{
+			"level":        "WARN",
+			"ts":           time.Now().UTC().Format(time.RFC3339),
+			"msg":          "window dropped: output buffer full",
+			"total_events": agg.TotalEvents,
+			"window_start": agg.WindowStart.Format(time.RFC3339),
+		}
+		b, _ := json.Marshal(rec)
+		fmt.Println(string(b))
 	}
 }
 
